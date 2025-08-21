@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: demo-ui-sa
+  namespace: demo-ui
+imagePullSecrets:
+  - name: jfrog-docker-secret   # created later by a command/script
