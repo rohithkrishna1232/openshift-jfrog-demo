@@ -1,0 +1,21 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: mirror-to-jfrog-run-1
+  namespace: rohith-chirrareddy-dev
+spec:
+  serviceAccountName: pipelines-mirror
+  pipelineRef:
+    name: mirror-to-jfrog
+  params:
+    - name: srcImage
+      value: docker.io/nginxdemos/hello:plain-text
+    - name: destRegistry
+      value: trialz3vmz5.jfrog.io          # NO https:// ; add /artifactory if your JFrog needs it
+    - name: destRepo
+      value: demo-docker
+    - name: destName
+      value: sample-ui
+    - name: destTag
+      value: v1
+

@@ -2,6 +2,6 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: pipelines-mirror
-  namespace: demo-ui
+  namespace: rohith-chirrareddy-dev
 secrets:
-  - name: jfrog-auth            # created later by a command/script
+  - name: jfrog-auth

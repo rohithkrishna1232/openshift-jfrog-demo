@@ -28,18 +28,19 @@ stringData:
 "@ | Out-File -Encoding ascii jfrog-auth.yaml
 
 oc apply -f jfrog-auth.yaml | Out-Null
+Remove-Item jfrog-auth.yaml
 
 # docker-registry secret for the app (pull from JFrog)
-& oc create secret docker-registry jfrog-docker-secret `
+oc create secret docker-registry jfrog-docker-secret `
   --docker-server="$DestRegistry" `
   --docker-username="$JfrogUser" `
   --docker-password="$JfrogToken" `
   --docker-email="devnull@local" `
-  -n $Namespace 2>$null | Out-Null
+  -n $Namespace --dry-run=client -o yaml | oc apply -f - | Out-Null
 
 # Link secrets to ServiceAccounts (you already committed these YAMLs)
-oc apply -f openshift/sa-deploy.yaml | Out-Null
-oc apply -f openshift/sa-pipeline.yaml | Out-Null
+oc apply -f ..\openshift\sa-deploy.yaml | Out-Null
+oc apply -f ..\openshift\sa-pipeline.yaml | Out-Null
 
 Write-Host "✅ Secrets created and ServiceAccounts applied."
 Write-Host "   - jfrog-auth (opaque) for Tekton"

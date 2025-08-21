@@ -1,0 +1,37 @@
+
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: mirror-to-jfrog
+  namespace: rohith-chirrareddy-dev
+spec:
+  params:
+    - name: srcImage
+      type: string
+    - name: destRegistry
+      type: string
+    - name: destRepo
+      type: string
+    - name: destName
+      type: string
+    - name: destTag
+      type: string
+  results:
+    - name: destImageRef
+      value: $(tasks.mirror.results.destImageRef)
+  tasks:
+    - name: mirror
+      taskRef:
+        name: mirror-image
+      params:
+        - name: srcImage
+          value: $(params.srcImage)
+        - name: destRegistry
+          value: $(params.destRegistry)
+        - name: destRepo
+          value: $(params.destRepo)
+        - name: destName
+          value: $(params.destName)
+        - name: destTag
+          value: $(params.destTag)
+

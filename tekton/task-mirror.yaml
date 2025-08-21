@@ -1,0 +1,42 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: mirror-image
+  namespace: rohith-chirrareddy-dev
+spec:
+  params:
+    - name: srcImage            # e.g. docker.io/nginxdemos/hello:plain-text
+      type: string
+    - name: destRegistry        # e.g. trialz3vmz5.jfrog.io  (NO https://)
+      type: string
+    - name: destRepo            # e.g. demo-docker
+      type: string
+    - name: destName            # e.g. sample-ui
+      type: string
+    - name: destTag             # e.g. v1
+      type: string
+  results:
+    - name: destImageRef
+      description: Fully-qualified destination image (registry/repo/name:tag)
+  steps:
+    - name: skopeo-copy
+      image: quay.io/skopeo/stable:latest
+      env:
+        - name: JF_USER
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-auth
+              key: username
+        - name: JF_PASS
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-auth
+              key: password
+      script: |
+        #!/usr/bin/env sh
+        set -eu
+        SRC="docker://$(params.srcImage)"
+        DEST="docker://$(params.destRegistry)/$(params.destRepo)/$(params.destName):$(params.destTag)"
+        echo -n "$DEST" > $(results.destImageRef.path)
+        # If your JFrog uses self-signed certs, add: --dest-tls-verify=false
+        skopeo copy "$SRC" "$DEST" --dest-creds "${JF_USER}:${JF_PASS}" --all
