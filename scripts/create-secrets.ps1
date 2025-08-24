@@ -1,8 +1,8 @@
 param(
   [string]$Namespace = $env:NS,
-  [string]$DestRegistry = $env:DEST_REGISTRY,   # e.g. devrabbit.jfrog.io OR devrabbit.jfrog.io/artifactory
-  [string]$JfrogUser = $env:JFROG_USER,         # e.g. 'robot$openshift'
-  [string]$JfrogToken = $env:JFROG_TOKEN        # API key or password
+  [string]$DestRegistry = $env:DEST_REGISTRY,  
+  [string]$JfrogUser = $env:JFROG_USER,         
+  [string]$JfrogToken = $env:JFROG_TOKEN       
 )
 
 if (-not $Namespace)    { $Namespace = "demo-ui" }
@@ -30,7 +30,7 @@ stringData:
 oc apply -f jfrog-auth.yaml | Out-Null
 Remove-Item jfrog-auth.yaml
 
-# docker-registry secret for the app (pull from JFrog)
+
 oc create secret docker-registry jfrog-docker-secret `
   --docker-server="$DestRegistry" `
   --docker-username="$JfrogUser" `
@@ -38,9 +38,9 @@ oc create secret docker-registry jfrog-docker-secret `
   --docker-email="devnull@local" `
   -n $Namespace --dry-run=client -o yaml | oc apply -f - | Out-Null
 
-# Link secrets to ServiceAccounts (you already committed these YAMLs)
-oc apply -f ..\openshift\sa-deploy.yaml | Out-Null
-oc apply -f ..\openshift\sa-pipeline.yaml | Out-Null
+
+oc apply -f .\openshift\sa-deploy.yaml | Out-Null
+oc apply -f .\openshift\sa-pipeline.yaml | Out-Null
 
 Write-Host "✅ Secrets created and ServiceAccounts applied."
 Write-Host "   - jfrog-auth (opaque) for Tekton"

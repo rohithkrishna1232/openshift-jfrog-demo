@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: List
+items:
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: sample-ui
+      namespace: rohith-chirrareddy-dev
+      labels: { app: sample-ui }
+    spec:
+      replicas: 2
+      selector: { matchLabels: { app: sample-ui } }
+      template:
+        metadata: { labels: { app: sample-ui } }
+        spec:
+          serviceAccountName: demo-ui-sa
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+          containers:
+            - name: sample-ui
+              image: trialz3vmz5.jfrog.io/demo-docker/sample-ui:DR
+              imagePullPolicy: IfNotPresent
+              ports: [{ containerPort: 8080 }]
+              readinessProbe:
+                httpGet: { path: "/", port: 8080 }
+                initialDelaySeconds: 5
+                periodSeconds: 10
+              livenessProbe:
+                httpGet: { path: "/", port: 8080 }
+                initialDelaySeconds: 15
+                periodSeconds: 20
+
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: sample-ui
+      namespace: rohith-chirrareddy-dev
+      labels: { app: sample-ui }
+    spec:
+      selector: { app: sample-ui }
+      ports:
+        - name: http
+          port: 80
+          targetPort: 8080
+
+  - apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      name: sample-ui
+      namespace: rohith-chirrareddy-dev
+      labels: { app: sample-ui }
+    spec:
+      to: { kind: Service, name: sample-ui }
+      port: { targetPort: http }
+      tls: { termination: edge }
